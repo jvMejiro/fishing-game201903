@@ -1,0 +1,5 @@
+rootProject.name = 'fishing-game201903'
+
+include 'core'
+include 'desktop'
+
