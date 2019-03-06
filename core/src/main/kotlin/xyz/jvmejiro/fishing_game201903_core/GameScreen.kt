@@ -7,15 +7,16 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.Stage
-import com.badlogic.gdx.utils.viewport.FillViewport
+import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.app.KtxScreen
+import ktx.graphics.rect
 import ktx.inject.Context
 
 class GameScreen(private val context: Context) : KtxScreen {
     private lateinit var shapeBatch: ShapeRenderer
     private lateinit var batch: SpriteBatch
-    private val viewport: Viewport by lazy { FillViewport(screenWidth, screenHeight) }
+    private val viewport: Viewport by lazy { FitViewport(screenWidth, screenHeight) }
     private lateinit var engine: PooledEngine
     private lateinit var backgroundColor: Color
 
@@ -40,8 +41,10 @@ class GameScreen(private val context: Context) : KtxScreen {
         shapeBatch.projectionMatrix = viewport.camera.combined
         batch.projectionMatrix = viewport.camera.combined
         shapeBatch.begin(ShapeRenderer.ShapeType.Filled)
+        shapeBatch.color = Color.YELLOW
+        shapeBatch.rect(0f, 0f, screenWidth, screenHeight)
         shapeBatch.color = Color.RED
-        shapeBatch.circle(screenWidth / 2, screenHeight / 2, 30f)
+        shapeBatch.circle(screenWidth / 2, screenHeight / 2, screenWidth / 2)
         shapeBatch.end()
         engine.update(Math.min(delta, 1 / 60f))
     }
