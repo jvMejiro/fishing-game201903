@@ -5,13 +5,18 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.app.KtxScreen
-import ktx.graphics.rect
+import ktx.ashley.add
+import ktx.ashley.entity
 import ktx.inject.Context
+import ktx.math.vec2
+import xyz.jvmejiro.fishing_game201903_core.systems.FishSpawnSystem
+import xyz.jvmejiro.fishing_game201903_core.systems.ShapeRenderSystem
 
 class GameScreen(private val context: Context) : KtxScreen {
     private lateinit var shapeBatch: ShapeRenderer
@@ -26,6 +31,8 @@ class GameScreen(private val context: Context) : KtxScreen {
         batch = SpriteBatch()
         backgroundColor = Color(91f / 256f, 110f / 256f, 225f / 256f, 1f)
         val stage = Stage(viewport, batch)
+        engine.addSystem(ShapeRenderSystem(shapeBatch))
+        engine.addSystem(FishSpawnSystem(0.01f))
     }
 
     override fun resize(width: Int, height: Int) {
@@ -37,14 +44,17 @@ class GameScreen(private val context: Context) : KtxScreen {
 
         Gdx.gl.glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
 
         shapeBatch.projectionMatrix = viewport.camera.combined
         batch.projectionMatrix = viewport.camera.combined
+
         shapeBatch.begin(ShapeRenderer.ShapeType.Filled)
         shapeBatch.color = Color.YELLOW
         shapeBatch.rect(0f, 0f, screenWidth, screenHeight)
-        shapeBatch.color = Color.RED
-        shapeBatch.circle(screenWidth / 2, screenHeight / 2, screenWidth / 2)
+//        shapeBatch.color = Color.RED
+//        shapeBatch.circle(screenWidth / 2, screenHeight / 2, screenWidth / 2)
         shapeBatch.end()
         engine.update(Math.min(delta, 1 / 60f))
     }
