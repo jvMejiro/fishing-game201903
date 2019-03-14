@@ -40,6 +40,13 @@ allprojects {
     dependencies {
         implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
         implementation group: 'io.github.libktx', name: 'ktx-app', version: libktxVersion
+
+        testImplementation "org.junit.jupiter:junit-jupiter-api:5.4.0"
+        testRuntime "org.junit.jupiter:junit-jupiter-engine:5.4.0"
+    }
+
+    test {
+        useJUnitPlatform()
     }
 
     compileKotlin {
@@ -55,8 +62,11 @@ project(':core') {
         ashleyVersion = "1.7.3"
     }
     dependencies {
+        // libGDX
         implementation "com.badlogicgames.ashley:ashley:$ashleyVersion"
         implementation "com.badlogicgames.gdx:gdx:$gdxVersion"
+
+        // libKTX
         implementation group: 'io.github.libktx', name: 'ktx-actors', version: libktxVersion
         implementation group: 'io.github.libktx', name: 'ktx-app', version: libktxVersion
         implementation group: 'io.github.libktx', name: 'ktx-assets', version: libktxVersion
@@ -69,6 +79,8 @@ project(':core') {
         implementation group: 'io.github.libktx', name: 'ktx-math', version: libktxVersion
         implementation group: 'io.github.libktx', name: 'ktx-scene2d', version: libktxVersion
 
+        // State Machine Library
+        implementation 'org.squirrelframework:squirrel-foundation:0.3.8'
     }
 }
 
@@ -79,3 +91,4 @@ project(':desktop') {
         implementation "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
     }
 }
+

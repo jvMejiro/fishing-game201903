@@ -5,13 +5,15 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
-import xyz.jvmejiro.fishing_game201903_core.states.StateInterface
+import ktx.math.vec2
+import xyz.jvmejiro.fishing_game201903_core.states.EntityState
+import kotlin.math.sign
 
 data class Rotation(var degree: Float = 0.0f, var axis: Vector2 = Vector2()) : Component
 data class Position(var value: Vector2 = Vector2()) : Component
 data class Size(var value: Vector2 = Vector2()) : Component
-data class Direction(val value: Vector2 = Vector2()) : Component
-data class Propelling(val direction: Vector2, val force: Float) : Component
+data class Direction(var value: Vector2 = Vector2()) : Component
+data class PropellingLogic(var logic: (delta: Float, total: Float) -> Vector2 = { _, _ -> vec2() }) : Component
 data class SpawnRegion(val region: Rectangle) : Component
 data class TextureComponent(
     var texture: TextureRegion?,
@@ -35,24 +37,29 @@ data class Move(
 )
 
 
-class StateComponent<T : StateInterface>(state: T, elapsedTime: Float = 0.0f) : Component {
-    var state: T = state
+class StateComponent : Component {
+    var state: EntityState = EntityState.Companion.SystemState.STATE_NOP
         set(value) {
             field = value
             resetTime()
         }
-    var elapsedTime: Float = elapsedTime
+    var elapsedTime: Float = 0.0f
         private set
 
     fun resetTime() {
         elapsedTime = 0.0f
     }
 
+    fun elapse(deltaTime: Float) {
+        if (deltaTime.sign < 0) throw IllegalSignException()
+        elapsedTime += deltaTime
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as StateComponent<*>
+        other as StateComponent
 
         if (state != other.state) return false
         if (elapsedTime != other.elapsedTime) return false

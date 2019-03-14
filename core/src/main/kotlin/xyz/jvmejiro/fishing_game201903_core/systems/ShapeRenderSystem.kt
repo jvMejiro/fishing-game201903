@@ -17,20 +17,21 @@ class ShapeRenderSystem(private val batch: ShapeRenderer) : IteratingSystem(
         Position::class.java,
         Hitbox::class.java,
         Rotation::class.java
-    ).get()
+    ).get(),
+    10
 ) {
     private lateinit var renderTargets: MutableList<Entity>
 
     companion object {
-        private val textureComponentMapper: ComponentMapper<TextureComponent> = mapperFor()
-        private val sizeMapper: ComponentMapper<Size> = mapperFor()
-        private val positionMapper: ComponentMapper<Position> = mapperFor()
-        private val hitboxMapper: ComponentMapper<Hitbox> = mapperFor()
-        private val rotationMapper: ComponentMapper<Rotation> = mapperFor()
+        private val TEXTURE_COMPONENT_MAPPER: ComponentMapper<TextureComponent> = mapperFor()
+        private val SIZE_MAPPER: ComponentMapper<Size> = mapperFor()
+        private val POSITION_MAPPER: ComponentMapper<Position> = mapperFor()
+        private val HITBOX_MAPPER: ComponentMapper<Hitbox> = mapperFor()
+        private val ROTATION_MAPPER: ComponentMapper<Rotation> = mapperFor()
     }
 
     override fun processEntity(entity: Entity, deltaTime: Float) {
-        if (entity[textureComponentMapper]?.isVisible == true) {
+        if (entity[TEXTURE_COMPONENT_MAPPER]?.isVisible == true) {
             renderTargets.add(entity)
         }
     }
@@ -40,14 +41,14 @@ class ShapeRenderSystem(private val batch: ShapeRenderer) : IteratingSystem(
         super.update(deltaTime)
         renderTargets.sortedWith(
             compareBy(
-                { it[textureComponentMapper]?.zLevel },
-                { -(it[positionMapper]?.value?.y ?: 0.0f) })
+                { it[TEXTURE_COMPONENT_MAPPER]?.zLevel },
+                { -(it[POSITION_MAPPER]?.value?.y ?: 0.0f) })
         )
         renderTargets.forEach {
-            val size = it[sizeMapper] ?: return@forEach
-            val position = it[positionMapper] ?: return@forEach
-            val hitbox = it[hitboxMapper] ?: return@forEach
-            val rotation = it[rotationMapper] ?: return@forEach
+            val size = it[SIZE_MAPPER] ?: return@forEach
+            val position = it[POSITION_MAPPER] ?: return@forEach
+            val hitbox = it[HITBOX_MAPPER] ?: return@forEach
+            val rotation = it[ROTATION_MAPPER] ?: return@forEach
 
             batch.begin(ShapeRenderer.ShapeType.Line)
 

@@ -5,18 +5,14 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.app.KtxScreen
-import ktx.ashley.add
-import ktx.ashley.entity
 import ktx.inject.Context
-import ktx.math.vec2
-import xyz.jvmejiro.fishing_game201903_core.systems.FishSpawnSystem
-import xyz.jvmejiro.fishing_game201903_core.systems.ShapeRenderSystem
+import xyz.jvmejiro.fishing_game201903_core.states.EventBus
+import xyz.jvmejiro.fishing_game201903_core.systems.*
 
 class GameScreen(private val context: Context) : KtxScreen {
     private lateinit var shapeBatch: ShapeRenderer
@@ -24,6 +20,7 @@ class GameScreen(private val context: Context) : KtxScreen {
     private val viewport: Viewport by lazy { FitViewport(screenWidth, screenHeight) }
     private lateinit var engine: PooledEngine
     private lateinit var backgroundColor: Color
+    private lateinit var eventBus: EventBus
 
     override fun show() {
         shapeBatch = ShapeRenderer()
@@ -31,8 +28,14 @@ class GameScreen(private val context: Context) : KtxScreen {
         batch = SpriteBatch()
         backgroundColor = Color(91f / 256f, 110f / 256f, 225f / 256f, 1f)
         val stage = Stage(viewport, batch)
+        eventBus = EventBus()
         engine.addSystem(ShapeRenderSystem(shapeBatch))
-        engine.addSystem(FishSpawnSystem(0.01f))
+        engine.addSystem(PropellingSystem(1.0f / 60.0f))
+        engine.addSystem(StateSystem())
+        engine.addSystem(FishSpawnSystem(10, 1.0f))
+        engine.addSystem(FishSystem(eventBus))
+
+        engine.addSystem(PlayerControlSystem(viewport))
     }
 
     override fun resize(width: Int, height: Int) {
@@ -56,6 +59,8 @@ class GameScreen(private val context: Context) : KtxScreen {
 //        shapeBatch.color = Color.RED
 //        shapeBatch.circle(screenWidth / 2, screenHeight / 2, screenWidth / 2)
         shapeBatch.end()
+
+        eventBus.update(delta)
         engine.update(Math.min(delta, 1 / 60f))
     }
 }
