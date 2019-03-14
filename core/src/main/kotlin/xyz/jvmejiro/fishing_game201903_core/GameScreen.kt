@@ -10,7 +10,12 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.app.KtxScreen
+import ktx.ashley.add
+import ktx.ashley.entity
 import ktx.inject.Context
+import ktx.math.vec2
+import xyz.jvmejiro.fishing_game201903_core.builders.FishingRodBuilder
+import xyz.jvmejiro.fishing_game201903_core.builders.PlayerBuilder
 import xyz.jvmejiro.fishing_game201903_core.states.EventBus
 import xyz.jvmejiro.fishing_game201903_core.systems.*
 
@@ -29,13 +34,30 @@ class GameScreen(private val context: Context) : KtxScreen {
         backgroundColor = Color(91f / 256f, 110f / 256f, 225f / 256f, 1f)
         val stage = Stage(viewport, batch)
         eventBus = EventBus()
+
+        // resister systems
         engine.addSystem(ShapeRenderSystem(shapeBatch))
         engine.addSystem(PropellingSystem(1.0f / 60.0f))
         engine.addSystem(StateSystem())
         engine.addSystem(FishSpawnSystem(10, 1.0f))
         engine.addSystem(FishSystem(eventBus))
 
+        engine.addSystem(PlayerSystem(eventBus))
         engine.addSystem(PlayerControlSystem(viewport))
+
+        // resister entities
+        engine.add {
+            val tempH = screenHeight * 0.75f
+            PlayerBuilder.builder(engine) {
+                position = vec2(10f, tempH)
+                size = vec2(20f, 30f)
+            }.build()
+
+            FishingRodBuilder.builder(engine) {
+                position = vec2(25f, tempH + 15f)
+                size = vec2(10f, 20f)
+            }.build()
+        }
     }
 
     override fun resize(width: Int, height: Int) {

@@ -8,22 +8,43 @@ import ktx.ashley.get
 import ktx.ashley.mapperFor
 import ktx.math.plus
 import xyz.jvmejiro.fishing_game201903_core.Position
-import xyz.jvmejiro.fishing_game201903_core.PropellingLogic
+import xyz.jvmejiro.fishing_game201903_core.Propelling
+import xyz.jvmejiro.fishing_game201903_core.Size
 import xyz.jvmejiro.fishing_game201903_core.StateComponent
 
 class PropellingSystem(interval: Float) :
-    IntervalIteratingSystem(all(PropellingLogic::class.java, Position::class.java).get(), interval) {
+    IntervalIteratingSystem(
+        all(
+            Propelling::class.java,
+            Position::class.java,
+            StateComponent::class.java,
+            Size::class.java
+        ).get(), interval
+    ) {
 
     companion object {
-        private val PROPELLING_LOGIC_MAPPER: ComponentMapper<PropellingLogic> = mapperFor()
+        private val PROPELLING_MAPPER: ComponentMapper<Propelling> = mapperFor()
         private val STATE_MAPPER: ComponentMapper<StateComponent> = mapperFor()
         private val POSITION_MAPPER: ComponentMapper<Position> = mapperFor()
+        private val SIZE_MAPPER: ComponentMapper<Size> = mapperFor()
     }
 
     override fun processEntity(entity: Entity) {
-        entity[POSITION_MAPPER]?.run {
+        entity[POSITION_MAPPER]?.also { pos ->
             val elapsed = entity[STATE_MAPPER]?.elapsedTime ?: return
-            value += entity[PROPELLING_LOGIC_MAPPER]?.logic?.invoke(interval, elapsed) ?: return@run
+            val size = entity[SIZE_MAPPER]?.value ?: return
+            entity[PROPELLING_MAPPER]?.apply {
+                try {
+                    // 移動ロジックの更新
+                    logic.first { it.first(pos.value, size) }.let {
+                        current = it.second
+                    }
+                } catch (e: NoSuchElementException) {
+                }
+
+                // 座標更新
+                pos.value += current(interval, elapsed)
+            }
         }
     }
 }

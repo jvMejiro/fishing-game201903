@@ -15,7 +15,7 @@ class FishSystem(eventBus: EventBus) : StateMachineSystem(
     all(
         Fish::class.java,
         Position::class.java,
-        PropellingLogic::class.java,
+        Propelling::class.java,
         StateComponent::class.java,
         Size::class.java
     ).get()
@@ -25,7 +25,7 @@ class FishSystem(eventBus: EventBus) : StateMachineSystem(
         private val FISH_MAPPER: ComponentMapper<Fish> = mapperFor()
         private val POSITION_MAPPER: ComponentMapper<Position> = mapperFor()
         private val STATE_MAPPER: ComponentMapper<StateComponent> = mapperFor()
-        private val PROPELLING_LOGIC_MAPPER: ComponentMapper<PropellingLogic> = mapperFor()
+        private val PROPELLING_MAPPER: ComponentMapper<Propelling> = mapperFor()
         private val SIZE_MAPPER: ComponentMapper<Size> = mapperFor()
     }
 
@@ -39,7 +39,7 @@ sealed class FishState : EntityState() {
     companion object {
         private val POSITION_MAPPER: ComponentMapper<Position> = mapperFor()
         private val SIZE_MAPPER: ComponentMapper<Size> = mapperFor()
-        private val PROPELLING_LOGIC_MAPPER: ComponentMapper<PropellingLogic> = mapperFor()
+        private val PROPELLING_MAPPER: ComponentMapper<Propelling> = mapperFor()
     }
 
     object IDLE : FishState() {
@@ -55,17 +55,14 @@ sealed class FishState : EntityState() {
     }
 
     object SWIMMING : FishState() {
-        val leftSwimLogic = { deltaTime: Float, elapsedTime: Float -> vec2(-0.5f, MathUtils.sin(elapsedTime) * 0.1f) }
-        val rightSwimLogic = { deltaTime: Float, elapsedTime: Float -> vec2(0.5f, MathUtils.sin(elapsedTime) * 0.1f) }
+        val leftSwimLogic: PropellingLogic =
+            { deltaTime, elapsedTime -> vec2(-0.5f, MathUtils.sin(elapsedTime) * 0.1f) }
+        val rightSwimLogic: PropellingLogic =
+            { deltaTime, elapsedTime -> vec2(0.5f, MathUtils.sin(elapsedTime) * 0.1f) }
 
         override fun update(entity: Entity, machine: StateMachineSystem, delta: Float) {
             val position = entity[POSITION_MAPPER] ?: return
             val size = entity[SIZE_MAPPER] ?: return
-            if (screenWidth < position.value.x) {
-                entity[PROPELLING_LOGIC_MAPPER]?.run { logic = leftSwimLogic } ?: return
-            } else if (position.value.x + size.value.x < 0.0f) {
-                entity[PROPELLING_LOGIC_MAPPER]?.run { logic = rightSwimLogic } ?: return
-            }
         }
     }
 

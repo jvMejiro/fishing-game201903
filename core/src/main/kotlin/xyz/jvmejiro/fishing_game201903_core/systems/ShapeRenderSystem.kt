@@ -15,7 +15,6 @@ class ShapeRenderSystem(private val batch: ShapeRenderer) : IteratingSystem(
         TextureComponent::class.java,
         Size::class.java,
         Position::class.java,
-        Hitbox::class.java,
         Rotation::class.java
     ).get(),
     10
@@ -47,13 +46,13 @@ class ShapeRenderSystem(private val batch: ShapeRenderer) : IteratingSystem(
         renderTargets.forEach {
             val size = it[SIZE_MAPPER] ?: return@forEach
             val position = it[POSITION_MAPPER] ?: return@forEach
-            val hitbox = it[HITBOX_MAPPER] ?: return@forEach
+            val hitbox = it[HITBOX_MAPPER]
             val rotation = it[ROTATION_MAPPER] ?: return@forEach
 
             batch.begin(ShapeRenderer.ShapeType.Line)
 
             draw(position, rotation, size)
-            drawHitbox(hitbox, position, rotation)
+            hitbox?.let { drawHitbox(it, position, rotation) }
             batch.end()
         }
     }
