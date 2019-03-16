@@ -1,18 +1,18 @@
 package xyz.jvmejiro.fishing_game201903_core.systems
 
-import com.badlogic.ashley.core.Family
 import com.badlogic.ashley.systems.IntervalSystem
 import com.badlogic.gdx.math.MathUtils.random
 import ktx.ashley.add
-import ktx.ashley.entity
+import ktx.ashley.allOf
 import ktx.math.vec2
-import xyz.jvmejiro.fishing_game201903_core.*
+import xyz.jvmejiro.fishing_game201903_core.Fish
 import xyz.jvmejiro.fishing_game201903_core.builders.FishBuilder
+import xyz.jvmejiro.fishing_game201903_core.screenHeight
 
 class FishSpawnSystem(private val maxFishSize: Int, interval: Float) : IntervalSystem(interval) {
 
     override fun updateInterval() {
-        val existingFishSize = engine.getEntitiesFor(Family.all(Fish::class.java).get()).size()
+        val existingFishSize = engine.getEntitiesFor(allOf(Fish::class).get()).size()
 
         if (existingFishSize < maxFishSize) {
             engine.add {

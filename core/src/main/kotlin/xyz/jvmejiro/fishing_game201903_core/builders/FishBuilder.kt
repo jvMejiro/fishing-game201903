@@ -22,13 +22,14 @@ class FishBuilder(val required: Engine) {
             with<Position> { value = position }
             with<Rotation> { }
             with<Direction> { value = direction }
+            with<StateComponent>()
         }.add(
             Hitbox(
                 vec2(hitBoxSize.x, hitBoxSize.y),
                 vec2(hitBoxOffset.x, hitBoxOffset.y),
                 ShapeType.Rectangle
             )
-        ).add(TextureComponent(texture = null)).add(StateComponent()).add(
+        ).add(TextureComponent(texture = null)).add(
             Propelling(
                 FishState.SWIMMING.rightSwimLogic,
                 listOf(

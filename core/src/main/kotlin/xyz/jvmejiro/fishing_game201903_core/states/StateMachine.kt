@@ -5,7 +5,6 @@ import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.Family
 import com.badlogic.ashley.systems.IteratingSystem
-import com.sun.webkit.dom.EntityImpl
 import ktx.ashley.get
 import ktx.ashley.mapperFor
 import ktx.log.debug
@@ -79,6 +78,7 @@ abstract class StateMachineSystem(
             EVENT_NOP(-1),
             EVENT_TOUCHED(-2),
             EVENT_SLIDE(-3),
+
             EVENT_KEY(-4),
             EVENT_KEY_UP(-5);
 

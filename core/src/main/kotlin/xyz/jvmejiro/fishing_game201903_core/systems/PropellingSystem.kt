@@ -2,8 +2,8 @@ package xyz.jvmejiro.fishing_game201903_core.systems
 
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
-import com.badlogic.ashley.core.Family.all
 import com.badlogic.ashley.systems.IntervalIteratingSystem
+import ktx.ashley.allOf
 import ktx.ashley.get
 import ktx.ashley.mapperFor
 import ktx.math.plus
@@ -14,11 +14,11 @@ import xyz.jvmejiro.fishing_game201903_core.StateComponent
 
 class PropellingSystem(interval: Float) :
     IntervalIteratingSystem(
-        all(
-            Propelling::class.java,
-            Position::class.java,
-            StateComponent::class.java,
-            Size::class.java
+        allOf(
+            Propelling::class,
+            Position::class,
+            StateComponent::class,
+            Size::class
         ).get(), interval
     ) {
 

@@ -10,7 +10,7 @@ const val screenHeight = 224f
 
 class FishingGame201903 : KtxGame<Screen>() {
 
-    private val context: Context = Context()            
+    private val context: Context = Context()
 
     override fun create() {
         context.register {

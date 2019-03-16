@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.utils.Pool
 import ktx.math.vec2
 import xyz.jvmejiro.fishing_game201903_core.states.EntityState
 import kotlin.math.sign
@@ -20,6 +21,7 @@ data class Propelling(
     var current: PropellingLogic,
     var logic: List<Pair<PropellingTiming, PropellingLogic>> = listOf()
 ) : Component
+
 data class SpawnRegion(val region: Rectangle) : Component
 data class TextureComponent(
     var texture: TextureRegion?,
@@ -32,24 +34,25 @@ data class TextureComponent(
 data class Hitbox(var size: Vector2, var offset: Vector2 = vec2(), var type: ShapeType) : Component
 data class Player(var score: Int = 0) : Component
 data class Fish(var point: Int = 0) : Component
-data class Hook(val start: Vector2, val target: Vector2, var caughtFish: Fish?) : Component
+data class Hook(val start: Vector2, val target: Vector2, var caughtFish: Fish? = null) : Component
 class FishingRod(var hookGenerateOffset: Vector2 = vec2(), var hookNum: Int = 1) : Component
 data class Move(
-    var elapsedTime: Float = 0.0f,
     var duration: Float,
-    var delay: Float,
     var from: Vector2,
     var target: Vector2,
-    val interpolation: Interpolation = Interpolation.linear
-)
+    val interpolation: Interpolation = Interpolation.linear,
+    var delay: Float = 0.0f,
+    var elapsedTime: Float = 0.0f
+) : Component
 
 
-class StateComponent : Component {
+class StateComponent : Component, Pool.Poolable {
     var state: EntityState = EntityState.Companion.SystemState.STATE_NOP
         set(value) {
             field = value
             resetTime()
         }
+
     var elapsedTime: Float = 0.0f
         private set
 
@@ -60,6 +63,10 @@ class StateComponent : Component {
     fun elapse(deltaTime: Float) {
         if (deltaTime.sign < 0) throw IllegalSignException()
         elapsedTime += deltaTime
+    }
+
+    override fun reset() {
+        state = EntityState.Companion.SystemState.STATE_NOP
     }
 
     override fun equals(other: Any?): Boolean {

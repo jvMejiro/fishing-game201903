@@ -15,6 +15,7 @@ class PlayerBuilder(private val engine: Engine) {
             with<Rotation>()
             with<Position> { value = position }
             with<Size> { value = size }
+            with<StateComponent>()
         }.add(TextureComponent(texture = null))
     }
 

@@ -11,7 +11,6 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.app.KtxScreen
 import ktx.ashley.add
-import ktx.ashley.entity
 import ktx.inject.Context
 import ktx.math.vec2
 import xyz.jvmejiro.fishing_game201903_core.builders.FishingRodBuilder
@@ -28,6 +27,7 @@ class GameScreen(private val context: Context) : KtxScreen {
     private lateinit var eventBus: EventBus
 
     override fun show() {
+        // initialize
         shapeBatch = ShapeRenderer()
         engine = PooledEngine()
         batch = SpriteBatch()
@@ -39,8 +39,12 @@ class GameScreen(private val context: Context) : KtxScreen {
         engine.addSystem(ShapeRenderSystem(shapeBatch))
         engine.addSystem(PropellingSystem(1.0f / 60.0f))
         engine.addSystem(StateSystem())
+        engine.addSystem(MoveSystem())
+
         engine.addSystem(FishSpawnSystem(10, 1.0f))
         engine.addSystem(FishSystem(eventBus))
+        engine.addSystem(FishingRodSystem(eventBus))
+        engine.addSystem(HookSystem(eventBus))
 
         engine.addSystem(PlayerSystem(eventBus))
         engine.addSystem(PlayerControlSystem(viewport))

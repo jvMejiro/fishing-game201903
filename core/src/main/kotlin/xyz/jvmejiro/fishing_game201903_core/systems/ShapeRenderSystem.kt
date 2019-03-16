@@ -2,20 +2,20 @@ package xyz.jvmejiro.fishing_game201903_core.systems
 
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
-import com.badlogic.ashley.core.Family.all
 import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import ktx.ashley.allOf
 import ktx.ashley.get
 import ktx.ashley.mapperFor
+import ktx.math.vec2
 import xyz.jvmejiro.fishing_game201903_core.*
 
 class ShapeRenderSystem(private val batch: ShapeRenderer) : IteratingSystem(
-    all(
-        TextureComponent::class.java,
-        Size::class.java,
-        Position::class.java,
-        Rotation::class.java
+    allOf(
+        TextureComponent::class,
+        Size::class,
+        Position::class
     ).get(),
     10
 ) {
@@ -47,7 +47,7 @@ class ShapeRenderSystem(private val batch: ShapeRenderer) : IteratingSystem(
             val size = it[SIZE_MAPPER] ?: return@forEach
             val position = it[POSITION_MAPPER] ?: return@forEach
             val hitbox = it[HITBOX_MAPPER]
-            val rotation = it[ROTATION_MAPPER] ?: return@forEach
+            val rotation = it[ROTATION_MAPPER]
 
             batch.begin(ShapeRenderer.ShapeType.Line)
 
@@ -59,23 +59,25 @@ class ShapeRenderSystem(private val batch: ShapeRenderer) : IteratingSystem(
 
     private fun draw(
         position: Position,
-        rotation: Rotation,
+        rotation: Rotation?,
         size: Size
     ) {
+        val axis = rotation?.axis ?: vec2()
+        val degree = rotation?.degree ?: 0.0f
         batch.color = Color.RED
         batch.rect(
             position.value.x, position.value.y,
-            rotation.axis.x, rotation.axis.y,
+            axis.x, axis.y,
             size.value.x, size.value.y,
             1.0f, 1.0f,
-            rotation.degree
+            degree
         )
     }
 
     private fun drawHitbox(
         hitbox: Hitbox,
         position: Position,
-        rotation: Rotation
+        rotation: Rotation?
     ) {
         batch.color = Color.BLUE.apply { a = 0.5f }
         when (hitbox.type) {

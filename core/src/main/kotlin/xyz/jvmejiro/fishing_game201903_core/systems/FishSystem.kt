@@ -2,8 +2,8 @@ package xyz.jvmejiro.fishing_game201903_core.systems
 
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
-import com.badlogic.ashley.core.Family.all
 import com.badlogic.gdx.math.MathUtils
+import ktx.ashley.allOf
 import ktx.ashley.get
 import ktx.ashley.mapperFor
 import ktx.math.vec2
@@ -12,12 +12,12 @@ import xyz.jvmejiro.fishing_game201903_core.states.*
 
 class FishSystem(eventBus: EventBus) : StateMachineSystem(
     eventBus,
-    all(
-        Fish::class.java,
-        Position::class.java,
-        Propelling::class.java,
-        StateComponent::class.java,
-        Size::class.java
+    allOf(
+        Fish::class,
+        Position::class,
+        Propelling::class,
+        StateComponent::class,
+        Size::class
     ).get()
 ) {
 

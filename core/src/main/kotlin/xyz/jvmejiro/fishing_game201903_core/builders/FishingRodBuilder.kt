@@ -22,6 +22,7 @@ class FishingRodBuilder(private val engine: Engine) {
             with<Position> { value = position }
             with<Size> { value = size }
             with<Rotation> { }
+            with<StateComponent>()
         }.add(TextureComponent(texture = null))
     }
 
