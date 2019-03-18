@@ -6,7 +6,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.ashley.allOf
-import xyz.jvmejiro.fishing_game201903_core.Player
+import xyz.jvmejiro.fishing_game201903_core.components.Player
 
 class PlayerControlSystem(val viewport: Viewport) : IteratingSystem(allOf(Player::class).get()) {
 

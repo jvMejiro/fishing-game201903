@@ -6,8 +6,8 @@ import com.badlogic.ashley.systems.IteratingSystem
 import ktx.ashley.allOf
 import ktx.ashley.get
 import ktx.ashley.mapperFor
-import xyz.jvmejiro.fishing_game201903_core.Move
-import xyz.jvmejiro.fishing_game201903_core.Position
+import xyz.jvmejiro.fishing_game201903_core.components.Move
+import xyz.jvmejiro.fishing_game201903_core.components.Position
 
 class MoveSystem : IteratingSystem(allOf(Position::class, Move::class).get()) {
     companion object {

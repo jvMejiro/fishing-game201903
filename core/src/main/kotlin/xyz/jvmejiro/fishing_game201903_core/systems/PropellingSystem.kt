@@ -7,44 +7,42 @@ import ktx.ashley.allOf
 import ktx.ashley.get
 import ktx.ashley.mapperFor
 import ktx.math.plus
-import xyz.jvmejiro.fishing_game201903_core.Position
-import xyz.jvmejiro.fishing_game201903_core.Propelling
-import xyz.jvmejiro.fishing_game201903_core.Size
-import xyz.jvmejiro.fishing_game201903_core.StateComponent
+import xyz.jvmejiro.fishing_game201903_core.components.*
 
 class PropellingSystem(interval: Float) :
     IntervalIteratingSystem(
         allOf(
-            Propelling::class,
+            PropellingComponent::class,
             Position::class,
-            StateComponent::class,
-            Size::class
-        ).get(), interval
+            StateComponent::class
+        ).get(), interval, PROPELLING_SYSTEM_PRIORITY
     ) {
 
     companion object {
-        private val PROPELLING_MAPPER: ComponentMapper<Propelling> = mapperFor()
+        private val PROPELLING_COMPONENT_MAPPER: ComponentMapper<PropellingComponent> = mapperFor()
         private val STATE_MAPPER: ComponentMapper<StateComponent> = mapperFor()
         private val POSITION_MAPPER: ComponentMapper<Position> = mapperFor()
-        private val SIZE_MAPPER: ComponentMapper<Size> = mapperFor()
+        val PROPELLING_SYSTEM_PRIORITY = 5
     }
 
     override fun processEntity(entity: Entity) {
-        entity[POSITION_MAPPER]?.also { pos ->
-            val elapsed = entity[STATE_MAPPER]?.elapsedTime ?: return
-            val size = entity[SIZE_MAPPER]?.value ?: return
-            entity[PROPELLING_MAPPER]?.apply {
-                try {
-                    // 移動ロジックの更新
-                    logic.first { it.first(pos.value, size) }.let {
-                        current = it.second
-                    }
-                } catch (e: NoSuchElementException) {
-                }
+        entity[PROPELLING_COMPONENT_MAPPER]?.also { pc ->
 
-                // 座標更新
-                pos.value += current(interval, elapsed)
-            }
+            // 座標更新
+            updatePosition(pc, entity, interval)
+        }
+    }
+
+    private fun updatePosition(
+        propelling: PropellingComponent,
+        entity: Entity,
+        interval: Float
+    ) {
+        val position = entity[POSITION_MAPPER] ?: return
+
+        propelling.current?.let {
+            val elapsedTime = entity[STATE_MAPPER]?.elapsedTime ?: return
+            position.value += it(interval, elapsedTime)
         }
     }
 }

@@ -3,8 +3,8 @@ package xyz.jvmejiro.fishing_game201903_core.systems
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Input
 import ktx.ashley.allOf
-import xyz.jvmejiro.fishing_game201903_core.Player
-import xyz.jvmejiro.fishing_game201903_core.StateComponent
+import xyz.jvmejiro.fishing_game201903_core.components.Player
+import xyz.jvmejiro.fishing_game201903_core.components.StateComponent
 import xyz.jvmejiro.fishing_game201903_core.states.EntityState
 import xyz.jvmejiro.fishing_game201903_core.states.EventBus
 import xyz.jvmejiro.fishing_game201903_core.states.EventInterface

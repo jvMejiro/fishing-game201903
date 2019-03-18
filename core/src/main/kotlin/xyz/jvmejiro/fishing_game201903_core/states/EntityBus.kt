@@ -14,7 +14,7 @@ interface EventListener {
     fun onEvent(event: EventInterface, eventData: EventData)
 }
 
-// FIXME: I should be abble to target multiple stuff at once
+// FIXME: I should be abble to to multiple stuff at once
 class EventData(var event: EventInterface? = null, var target: Entity? = null, var body: Any? = null) : Pool.Poolable {
     override fun reset() {
         event = null

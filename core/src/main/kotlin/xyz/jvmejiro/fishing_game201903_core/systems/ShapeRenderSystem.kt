@@ -9,7 +9,7 @@ import ktx.ashley.allOf
 import ktx.ashley.get
 import ktx.ashley.mapperFor
 import ktx.math.vec2
-import xyz.jvmejiro.fishing_game201903_core.*
+import xyz.jvmejiro.fishing_game201903_core.components.*
 
 class ShapeRenderSystem(private val batch: ShapeRenderer) : IteratingSystem(
     allOf(

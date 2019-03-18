@@ -5,19 +5,22 @@ import com.badlogic.gdx.math.MathUtils.random
 import ktx.ashley.add
 import ktx.ashley.allOf
 import ktx.math.vec2
-import xyz.jvmejiro.fishing_game201903_core.Fish
+import xyz.jvmejiro.fishing_game201903_core.components.Fish
 import xyz.jvmejiro.fishing_game201903_core.builders.FishBuilder
 import xyz.jvmejiro.fishing_game201903_core.screenHeight
 
 class FishSpawnSystem(private val maxFishSize: Int, interval: Float) : IntervalSystem(interval) {
+    companion object {
+        private val FISH_FAMILY = allOf(Fish::class).get()
+    }
 
     override fun updateInterval() {
-        val existingFishSize = engine.getEntitiesFor(allOf(Fish::class).get()).size()
+        val existingFishSize = engine.getEntitiesFor(FISH_FAMILY).size()
 
         if (existingFishSize < maxFishSize) {
             engine.add {
                 val sizeW = 20f
-                val sizeH = 20f
+                val sizeH = 10f
                 val offset = 5f
                 val posX = -sizeW
                 val posY = random(0.0f, screenHeight * 0.75f - sizeH)

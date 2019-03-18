@@ -15,35 +15,39 @@ import ktx.inject.Context
 import ktx.math.vec2
 import xyz.jvmejiro.fishing_game201903_core.builders.FishingRodBuilder
 import xyz.jvmejiro.fishing_game201903_core.builders.PlayerBuilder
+import xyz.jvmejiro.fishing_game201903_core.components.PropellingLogicSystem
 import xyz.jvmejiro.fishing_game201903_core.states.EventBus
 import xyz.jvmejiro.fishing_game201903_core.systems.*
 
 class GameScreen(private val context: Context) : KtxScreen {
     private lateinit var shapeBatch: ShapeRenderer
-    private lateinit var batch: SpriteBatch
+    private val batch: SpriteBatch by lazy { SpriteBatch() }
     private val viewport: Viewport by lazy { FitViewport(screenWidth, screenHeight) }
+    private val stage: Stage by lazy { Stage(viewport, batch) }
     private lateinit var engine: PooledEngine
     private lateinit var backgroundColor: Color
     private lateinit var eventBus: EventBus
 
     override fun show() {
+//        Gdx.app.logLevel = Application.LOG_DEBUG
+
         // initialize
         shapeBatch = ShapeRenderer()
         engine = PooledEngine()
-        batch = SpriteBatch()
         backgroundColor = Color(91f / 256f, 110f / 256f, 225f / 256f, 1f)
-        val stage = Stage(viewport, batch)
-        eventBus = EventBus()
+
 
         // resister systems
+        eventBus = EventBus()
         engine.addSystem(ShapeRenderSystem(shapeBatch))
         engine.addSystem(PropellingSystem(1.0f / 60.0f))
+        engine.addSystem(PropellingLogicSystem(eventBus))
         engine.addSystem(StateSystem())
         engine.addSystem(MoveSystem())
 
-        engine.addSystem(FishSpawnSystem(10, 1.0f))
+        engine.addSystem(FishSpawnSystem(500, 0.1f))
         engine.addSystem(FishSystem(eventBus))
-        engine.addSystem(FishingRodSystem(eventBus))
+        engine.addSystem(FishingRodSystem(eventBus, stage))
         engine.addSystem(HookSystem(eventBus))
 
         engine.addSystem(PlayerSystem(eventBus))
@@ -60,33 +64,40 @@ class GameScreen(private val context: Context) : KtxScreen {
             FishingRodBuilder.builder(engine) {
                 position = vec2(25f, tempH + 15f)
                 size = vec2(10f, 20f)
+                hookNum = 5
+                hookGenerateOffset = vec2(10f, 0f)
             }.build()
         }
     }
 
     override fun resize(width: Int, height: Int) {
-        viewport.update(width, height)
+        stage.viewport.update(width, height)
     }
 
     override fun render(delta: Float) {
-        viewport.apply()
 
         Gdx.gl.glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
         Gdx.gl.glEnable(GL20.GL_BLEND)
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
 
-        shapeBatch.projectionMatrix = viewport.camera.combined
-        batch.projectionMatrix = viewport.camera.combined
+
+        shapeBatch.projectionMatrix = stage.viewport.camera.combined
+        batch.projectionMatrix = stage.viewport.camera.combined
 
         shapeBatch.begin(ShapeRenderer.ShapeType.Filled)
         shapeBatch.color = Color.YELLOW
         shapeBatch.rect(0f, 0f, screenWidth, screenHeight)
-//        shapeBatch.color = Color.RED
-//        shapeBatch.circle(screenWidth / 2, screenHeight / 2, screenWidth / 2)
         shapeBatch.end()
 
+        stage.draw()
         eventBus.update(delta)
         engine.update(Math.min(delta, 1 / 60f))
+    }
+
+    override fun dispose() {
+        super.dispose()
+        shapeBatch.dispose()
+        stage.dispose()
     }
 }

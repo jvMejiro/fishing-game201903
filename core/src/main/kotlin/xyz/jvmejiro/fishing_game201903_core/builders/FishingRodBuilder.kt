@@ -4,7 +4,7 @@ import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import ktx.ashley.entity
 import ktx.math.vec2
-import xyz.jvmejiro.fishing_game201903_core.*
+import xyz.jvmejiro.fishing_game201903_core.components.*
 
 class FishingRodBuilder(private val engine: Engine) {
     var position = vec2()
@@ -16,7 +16,7 @@ class FishingRodBuilder(private val engine: Engine) {
         if (hookNum < 0) throw IllegalBuildParameterException()
         return engine.entity {
             with<FishingRod> {
-                hookGenerateOffset = this@FishingRodBuilder.hookGenerateOffset
+                hookSpawnPointOffset = this@FishingRodBuilder.hookGenerateOffset
                 hookNum = this@FishingRodBuilder.hookNum
             }
             with<Position> { value = position }

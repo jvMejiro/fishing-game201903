@@ -7,7 +7,7 @@ import ktx.ashley.entity
 import ktx.ashley.has
 import ktx.ashley.mapperFor
 import ktx.math.vec2
-import xyz.jvmejiro.fishing_game201903_core.*
+import xyz.jvmejiro.fishing_game201903_core.components.*
 
 class HookBuilder(
     parentFishingRod: Entity,
@@ -21,23 +21,24 @@ class HookBuilder(
 
     var position = vec2()
     var size = vec2()
-    var direction = vec2()
+    var direction = vec2(1f, 0f)
     var hitBoxSize = vec2()
     var hitBoxOffset = vec2()
     var moveDuration = 0.0f
+    var sinkDepth = 0.0f
 
     companion object {
         private val FISHING_ROD_MAPPER: ComponentMapper<FishingRod> = mapperFor()
         fun builder(fishingRod: Entity, engine: Engine, body: HookBuilder.() -> Unit) =
-            HookBuilder(fishingRod, engine).apply(body).build()
+            HookBuilder(fishingRod, engine).apply(body)
     }
 
-    private fun build(): Entity {
-        val to = vec2(position.x, 0.0f)
+    fun build(): Entity {
+        val to = vec2(position.x, position.y - sinkDepth)
         return engine.entity {
             with<Position> { value = position.cpy() }
-            with<Size> { value = size }
-            with<Direction> { value = direction }
+            with<Size> { value = size.cpy() }
+            with<Direction> { value = direction.cpy() }
             with<Rotation>()
             with<StateComponent>()
         }.add(
@@ -48,13 +49,14 @@ class HookBuilder(
             )
         ).add(TextureComponent(texture = null)).add(
             Hook(
-                start = position.cpy(), target = to
+                parentFishingRod = parentFishingRod,
+                hookOffset = vec2(size.x / 2.0f, size.y / 2.0f), from = position.cpy(), to = to.cpy()
             )
         ).add(
             Move(
                 duration = moveDuration,
                 from = position.cpy(),
-                target = to
+                target = to.cpy()
             )
         )
     }

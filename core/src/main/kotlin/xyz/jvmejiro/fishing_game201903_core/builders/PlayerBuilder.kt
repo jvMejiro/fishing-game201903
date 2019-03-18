@@ -3,7 +3,7 @@ package xyz.jvmejiro.fishing_game201903_core.builders
 import com.badlogic.ashley.core.Engine
 import ktx.ashley.entity
 import ktx.math.vec2
-import xyz.jvmejiro.fishing_game201903_core.*
+import xyz.jvmejiro.fishing_game201903_core.components.*
 
 class PlayerBuilder(private val engine: Engine) {
     var position = vec2()
