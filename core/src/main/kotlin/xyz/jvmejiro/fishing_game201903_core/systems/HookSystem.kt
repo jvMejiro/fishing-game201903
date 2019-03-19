@@ -3,6 +3,7 @@ package xyz.jvmejiro.fishing_game201903_core.systems
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.math.Vector2
 import ktx.ashley.allOf
 import ktx.ashley.get
 import ktx.ashley.has
@@ -83,14 +84,11 @@ class HookSystem(eventBus: EventBus) :
                 fishPos.value.y + fishHitbox.offset.y,
                 fishHitbox.size.x, fishHitbox.size.y
             )
-            val hookPos = entity[POSITION_MAPPER] ?: continue
-            val hookHitbox = entity[HITBOX_MAPPER] ?: continue
 
-            val hitboxRect = Rectangle(
-                hookPos.value.x + hookHitbox.offset.x,
-                hookPos.value.y + hookHitbox.offset.y,
-                hookHitbox.size.x, hookHitbox.size.y
-            )
+            val direction = fishEntity[DIRECTION_MAPPER]?.value ?: vec2(1f, 0f)
+            val hitboxRect =
+                createHitboxRectangle(entity, direction) ?: continue
+
             // 衝突判定
             if (tmpRectangle.overlaps(hitboxRect)) {
                 debug { "FISH_CAUGHT" }
@@ -100,6 +98,22 @@ class HookSystem(eventBus: EventBus) :
             }
         }
     }
+
+    private fun createHitboxRectangle(hitboxEntity: Entity, direction: Vector2): Rectangle? {
+        val hookPos = hitboxEntity[POSITION_MAPPER] ?: return null
+        val hookHitbox = hitboxEntity[HITBOX_MAPPER] ?: return null
+        val hookCenterPos = hookPos.value + (hitboxEntity[SIZE_MAPPER]?.value?.div(2.0f) ?: vec2())
+        // TODO Quaternion使った手法に変えたほうが良い
+        val currentHitboxPosX =
+            hookCenterPos.x + (hookPos.value.x + hookHitbox.offset.x - hookCenterPos.x) * direction.x
+        val currentHitboxPosY = hookPos.value.y + hookHitbox.offset.y
+        val hitboxRect = Rectangle(
+            currentHitboxPosX, currentHitboxPosY,
+            hookHitbox.size.x * direction.x, hookHitbox.size.y
+        )
+        return hitboxRect
+    }
+
 }
 
 sealed class HookState : EntityState() {

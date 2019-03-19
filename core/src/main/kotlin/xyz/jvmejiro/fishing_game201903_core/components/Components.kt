@@ -6,8 +6,6 @@ import com.badlogic.gdx.math.Interpolation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import ktx.math.vec2
-import xyz.jvmejiro.fishing_game201903_core.builders.IllegalBuildParameterException
-import java.lang.IllegalArgumentException
 
 data class Rotation(var degree: Float = 0.0f, var axis: Vector2 = vec2()) : Component
 data class Position(var value: Vector2 = vec2()) : Component
@@ -22,6 +20,8 @@ data class TextureComponent(
     var offset: Vector2 = vec2(),
     var alpha: Float = 1f
 ) : Component
+
+class PointComponent(val point: Int = 0) : Component
 
 data class Hitbox(var size: Vector2, var offset: Vector2 = vec2(), var type: ShapeType) : Component
 data class Player(var score: Int = 0) : Component

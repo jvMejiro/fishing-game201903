@@ -2,7 +2,8 @@ package xyz.jvmejiro.fishing_game201903_core.systems
 
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
-import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.math.Quaternion
+import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.Stage
 import ktx.ashley.add
 import ktx.ashley.allOf
@@ -10,10 +11,12 @@ import ktx.ashley.get
 import ktx.ashley.mapperFor
 import ktx.math.plus
 import ktx.math.vec2
+import ktx.math.vec3
 import xyz.jvmejiro.fishing_game201903_core.builders.HookBuilder
 import xyz.jvmejiro.fishing_game201903_core.components.FishingRod
 import xyz.jvmejiro.fishing_game201903_core.components.Hook
 import xyz.jvmejiro.fishing_game201903_core.components.Position
+import xyz.jvmejiro.fishing_game201903_core.coordinatesOfRightBottomCorner
 import xyz.jvmejiro.fishing_game201903_core.states.*
 
 class FishingRodSystem(eventBus: EventBus, val stage: Stage) :
@@ -47,13 +50,13 @@ sealed class FishingRodState : EntityState() {
     object IDLE : FishingRodState()
     object THROW_ANIMATION : FishingRodState()
     object SHINKING_HOOKS : FishingRodState() {
-        private val HOOK_FAMILY = allOf(Hook::class).get()
+        private val SIZE = 10f
         private val HOOK_OFFSET_DATA = arrayOf(
             vec2(0f, 0f) to vec2(-1f, 0f),
-            vec2(-2.5f, 5f) to vec2(1f, 0f),
-            vec2(0f, 10f) to vec2(-1f, 0f),
-            vec2(-2.5f, 15f) to vec2(1f, 0f),
-            vec2(0f, 20f) to vec2(-1f, 0f)
+            vec2(-SIZE, SIZE) to vec2(1f, 0f),
+            vec2(0f, SIZE * 2) to vec2(-1f, 0f),
+            vec2(-SIZE, SIZE * 3) to vec2(1f, 0f),
+            vec2(0f, SIZE * 4) to vec2(-1f, 0f)
         )
 
         override fun enter(entity: Entity, machine: StateMachineSystem, eventData: EventData) {
@@ -64,13 +67,13 @@ sealed class FishingRodState : EntityState() {
                 machine.engine.add {
                     HookBuilder.builder(entity, machine.engine) {
                         this.position = position.value + fishingRod.hookSpawnPointOffset + HOOK_OFFSET_DATA[idx].first
-                        this.size = vec2(5f, 5f)
-                        hitBoxSize = vec2(3f, 3f)
+                        this.size = vec2(SIZE, SIZE)
+                        hitBoxSize = vec2(4f, 4f)
                         hitBoxOffset = vec2(1f, 1f)
                         direction = HOOK_OFFSET_DATA[idx].second
                         moveDuration = 3.0f
-
-                        sinkDepth = 100f
+                        val stage = (machine as FishingRodSystem).stage
+                        sinkDepth = position.value.y - stage.viewport.coordinatesOfRightBottomCorner.y
                     }.build()
                 }
             }
@@ -80,7 +83,6 @@ sealed class FishingRodState : EntityState() {
             // HOOKの削除
             val removableEntities = machine.engine.getEntitiesFor(allOf(Hook::class).get()).map { it }
             removableEntities.forEach { machine.engine.removeEntity(it) }
-
         }
     }
 }

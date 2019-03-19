@@ -28,6 +28,7 @@ class FishSpawnSystem(private val maxFishSize: Int, interval: Float) : IntervalS
                 FishBuilder.builder(engine) {
                     position = vec2(posX, posY)
                     size = vec2(sizeW, sizeH)
+                    direction = vec2(1f, 0f)
                     hitBoxSize = vec2(size.x - offset, size.y - offset)
                     hitBoxOffset = vec2(offset / 2.0f, offset / 2.0f)
                 }.build()
