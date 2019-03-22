@@ -56,13 +56,13 @@ class GameScreen(private val context: Context) : KtxScreen {
         eventBus = EventBus()
         engine.addSystem(ShapeRenderSystem(shapeBatch))
         engine.addSystem(PropellingSystem(1.0f / 60.0f))
-        engine.addSystem(PropellingLogicSystem(eventBus))
+        engine.addSystem(PropellingLogicSystem(eventBus, gameStage.viewport))
         engine.addSystem(StateSystem())
         engine.addSystem(MoveSystem())
 
-        engine.addSystem(FishSpawnSystem(1000, 0.1f))
-        engine.addSystem(FishSystem(eventBus))
-        engine.addSystem(FishingRodSystem(eventBus, gameStage))
+        engine.addSystem(FishSpawnSystem(1000, gameStage.viewport, 0.1f))
+        engine.addSystem(FishSystem(eventBus, gameStage.viewport))
+        engine.addSystem(FishingRodSystem(eventBus, gameStage.viewport))
         engine.addSystem(HookSystem(eventBus))
 
         engine.addSystem(PlayerSystem(eventBus))
@@ -87,6 +87,7 @@ class GameScreen(private val context: Context) : KtxScreen {
 
     override fun resize(width: Int, height: Int) {
         gameStage.viewport.update(width, height)
+        uiStage.viewport.update(width, height)
     }
 
     override fun render(delta: Float) {
@@ -101,13 +102,13 @@ class GameScreen(private val context: Context) : KtxScreen {
 
         shapeBatch.begin(ShapeRenderer.ShapeType.Filled)
         shapeBatch.color = Color.YELLOW
-        shapeBatch.rect(0f, 0f, 1000f, 1000f)
+        val fl = screenHeight * 0.25f
+        shapeBatch.rect(0f, screenHeight - fl, 1000f, fl)
         shapeBatch.end()
 
-        gameStage.viewport.worldWidth *= 1.0005f
-        gameStage.viewport.worldHeight *= 1.0005f
+//        gameStage.viewport.worldWidth *= 1.0005f
+//        gameStage.viewport.worldHeight *= 1.0005f
 
-//        println("${gameStage.viewport.screenX}  ${gameStage.viewport.screenY}")
         gameStage.viewport.apply(vec2(0f, screenHeight))
         uiStage.viewport.apply(vec2(0f, screenHeight))
 

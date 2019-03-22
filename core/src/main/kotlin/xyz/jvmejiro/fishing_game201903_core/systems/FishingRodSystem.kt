@@ -2,16 +2,14 @@ package xyz.jvmejiro.fishing_game201903_core.systems
 
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
-import com.badlogic.gdx.math.Quaternion
-import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.Stage
+import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.ashley.add
 import ktx.ashley.allOf
 import ktx.ashley.get
 import ktx.ashley.mapperFor
 import ktx.math.plus
 import ktx.math.vec2
-import ktx.math.vec3
 import xyz.jvmejiro.fishing_game201903_core.builders.HookBuilder
 import xyz.jvmejiro.fishing_game201903_core.components.FishingRod
 import xyz.jvmejiro.fishing_game201903_core.components.Hook
@@ -19,7 +17,7 @@ import xyz.jvmejiro.fishing_game201903_core.components.Position
 import xyz.jvmejiro.fishing_game201903_core.coordinatesOfRightBottomCorner
 import xyz.jvmejiro.fishing_game201903_core.states.*
 
-class FishingRodSystem(eventBus: EventBus, val stage: Stage) :
+class FishingRodSystem(eventBus: EventBus, val gameViewport: Viewport) :
     StateMachineSystem(eventBus, allOf(FishingRod::class, Position::class).get()) {
     companion object {
         private val FISHING_ROG_MAPPER: ComponentMapper<FishingRod> = mapperFor()
@@ -72,8 +70,8 @@ sealed class FishingRodState : EntityState() {
                         hitBoxOffset = vec2(1f, 1f)
                         direction = HOOK_OFFSET_DATA[idx].second
                         moveDuration = 3.0f
-                        val stage = (machine as FishingRodSystem).stage
-                        sinkDepth = position.value.y - stage.viewport.coordinatesOfRightBottomCorner.y
+                        val viewport = (machine as FishingRodSystem).gameViewport
+                        sinkDepth = position.value.y - viewport.coordinatesOfRightBottomCorner.y
                     }.build()
                 }
             }

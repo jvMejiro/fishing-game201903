@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.utils.Array
 import ktx.ashley.entity
 import ktx.math.vec2
+import xyz.jvmejiro.fishing_game201903_core.PropellingUtil
 import xyz.jvmejiro.fishing_game201903_core.components.*
 import xyz.jvmejiro.fishing_game201903_core.screenWidth
 import xyz.jvmejiro.fishing_game201903_core.systems.FishState
@@ -19,8 +20,8 @@ class FishBuilder(val required: Engine) {
     fun build(): Entity {
         val pds = Array<PropellingData>()
         pds.add(
-            PropellingData({ pos, size -> pos.x < -size.x }, FishState.SWIMMING.rightSwimLogic, 1f),
-            PropellingData({ pos, _ -> screenWidth < pos.x }, FishState.SWIMMING.leftSwimLogic, 1f)
+            PropellingData(PropellingUtil.Timing.SCREEN_OUT_LEFT, FishState.SWIMMING.rightSwimLogic, 1f),
+            PropellingData(PropellingUtil.Timing.SCREEN_OUT_RIGHT, FishState.SWIMMING.leftSwimLogic, 1f)
         )
         return required.entity {
             with<Fish> {

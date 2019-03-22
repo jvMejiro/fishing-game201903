@@ -3,6 +3,7 @@ package xyz.jvmejiro.fishing_game201903_core.components
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.systems.IteratingSystem
+import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.ashley.allOf
 import ktx.ashley.get
 import ktx.ashley.mapperFor
@@ -10,7 +11,7 @@ import xyz.jvmejiro.fishing_game201903_core.states.EventBus
 import xyz.jvmejiro.fishing_game201903_core.states.EventInterface
 import xyz.jvmejiro.fishing_game201903_core.systems.PropellingSystem
 
-class PropellingLogicSystem(private val eventBus: EventBus) :
+class PropellingLogicSystem(private val eventBus: EventBus, private val gameViewport: Viewport) :
     IteratingSystem(
         allOf(PropellingLogicComponent::class, Position::class, Size::class, StateComponent::class).get(),
         PropellingSystem.PROPELLING_SYSTEM_PRIORITY + 1
@@ -25,19 +26,16 @@ class PropellingLogicSystem(private val eventBus: EventBus) :
 
     override fun processEntity(entity: Entity, deltaTime: Float) {
         entity[PROPELLING_LOGIC_MAPPER]?.let { plc ->
-            val position = entity[POSITION_MAPPER] ?: return
             try {
-                val size = entity[SIZE_MAPPER]?.value ?: return
-
                 // 直前に適応された移動ロジックの適応タイミングが再び適応される場合、更新処理を無視
                 plc.lastPropellingData?.timing?.let {
-                    if (it(position.value, size)) return
+                    if (it(entity, gameViewport)) return
                 }
                 // 移動ロジックの更新
-                plc.logic.first { it.timing(position.value, size) }.let { pd ->
+                plc.logic.first { it.timing(entity, gameViewport) }.let { pd ->
                     val eventData = eventBus.createEventData()
                     val maintainedElapsedTime = entity[STATE_MAPPER]?.elapsedTime ?: return
-                    eventData.body = PropellingLogicMessage(pd.delay, maintainedElapsedTime, pd.logic)
+                    eventData.body = PropellingLogicMessage(pd.delay, maintainedElapsedTime, pd.timing, pd.logic)
                     plc.lastPropellingData = pd
                     eventBus.emit(PropellingLogicEvent.CHANGE_LOGIC, entity, eventData)
                 }
@@ -45,12 +43,12 @@ class PropellingLogicSystem(private val eventBus: EventBus) :
             }
         }
     }
-
 }
 
 data class PropellingLogicMessage(
     val delayTime: Float,
     val maintainedElapsedTime: Float,
+    val nextLogicTiming: PropellingTiming,
     val nextLogic: PropellingLogic
 )
 

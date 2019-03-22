@@ -3,6 +3,7 @@ package xyz.jvmejiro.fishing_game201903_core.systems
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.math.MathUtils
+import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.ashley.allOf
 import ktx.ashley.get
 import ktx.ashley.mapperFor
@@ -10,7 +11,7 @@ import ktx.math.vec2
 import xyz.jvmejiro.fishing_game201903_core.components.*
 import xyz.jvmejiro.fishing_game201903_core.states.*
 
-class FishSystem(eventBus: EventBus) : StateMachineSystem(
+class FishSystem(eventBus: EventBus, val gameViewport: Viewport) : StateMachineSystem(
     eventBus,
     allOf(
         Fish::class,
@@ -20,15 +21,6 @@ class FishSystem(eventBus: EventBus) : StateMachineSystem(
     ).get(),
     5
 ) {
-
-    companion object {
-        private val FISH_MAPPER: ComponentMapper<Fish> = mapperFor()
-        private val POSITION_MAPPER: ComponentMapper<Position> = mapperFor()
-        private val STATE_MAPPER: ComponentMapper<StateComponent> = mapperFor()
-        private val PROPELLING_COMPONENT_MAPPER: ComponentMapper<PropellingComponent> = mapperFor()
-        private val SIZE_MAPPER: ComponentMapper<Size> = mapperFor()
-    }
-
     override fun describeMachine() {
         startWith(FishState.SWIMMING)
         onState(FishState.SWIMMING).on(FishEvent.BE_CAUGHT) { entity, event ->
@@ -39,6 +31,9 @@ class FishSystem(eventBus: EventBus) : StateMachineSystem(
         }
         onState(FishState.SWIMMING_IDLE).on(FishEvent.FINISH_SWIMMING_IDLE) { entity, event ->
             go(FishState.SWIMMING, entity, event)
+        }
+        onState(FishState.SWIMMING_IDLE).on(FishEvent.INTERRUPTION) { entity, event ->
+            engine.removeEntity(entity)
         }
     }
 }
@@ -89,10 +84,17 @@ sealed class FishState : EntityState() {
         override fun update(entity: Entity, machine: StateMachineSystem, delta: Float) {
             val propellingLogicMessage = IDLE_TIME_MAP[entity] ?: return
             val elapsedTime = entity[STATE_MAPPER]?.elapsedTime ?: return
+            // 遅延中に遷移条件を満たさなくなった場合、中断イベントを発信
+
+            // 経過時間チェック
             if (elapsedTime > propellingLogicMessage.delayTime) {
                 val eventData = machine.eventBus.createEventData()
                 eventData.body = propellingLogicMessage
                 machine.eventBus.emit(FishEvent.FINISH_SWIMMING_IDLE, entity, eventData)
+            } else {
+                if (!propellingLogicMessage.nextLogicTiming(entity, (machine as FishSystem).gameViewport)) {
+                    machine.eventBus.emit(FishEvent.INTERRUPTION, entity)
+                }
             }
         }
 
@@ -109,7 +111,8 @@ sealed class FishState : EntityState() {
 }
 
 enum class FishEvent(private val priority: Int) : EventInterface {
-    BE_CAUGHT(1), FINISH_SWIMMING_IDLE(1);
+    BE_CAUGHT(1), FINISH_SWIMMING_IDLE(1),
+    INTERRUPTION(2);
 
     override fun getPriority(): Int = priority
 }
