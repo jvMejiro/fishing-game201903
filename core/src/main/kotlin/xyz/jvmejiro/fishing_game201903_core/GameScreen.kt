@@ -103,11 +103,18 @@ class GameScreen(private val context: Context) : KtxScreen {
         shapeBatch.begin(ShapeRenderer.ShapeType.Filled)
         shapeBatch.color = Color.YELLOW
         val fl = screenHeight * 0.25f
-        shapeBatch.rect(0f, screenHeight - fl, 1000f, fl)
+        shapeBatch.rect(0f, screenHeight - fl, gameStage.viewport.worldWidth, fl)
+        shapeBatch.color = Color.CYAN
+        shapeBatch.rect(
+            0f,
+            gameStage.viewport.coordinatesOfRightBottomCorner.y,
+            gameStage.viewport.worldWidth,
+            gameStage.viewport.worldHeight - fl
+        )
         shapeBatch.end()
 
-//        gameStage.viewport.worldWidth *= 1.0005f
-//        gameStage.viewport.worldHeight *= 1.0005f
+        gameStage.viewport.worldWidth += .5f
+        gameStage.viewport.worldHeight += .5f
 
         gameStage.viewport.apply(vec2(0f, screenHeight))
         uiStage.viewport.apply(vec2(0f, screenHeight))

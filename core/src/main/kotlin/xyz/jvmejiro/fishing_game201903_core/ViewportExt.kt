@@ -16,3 +16,7 @@ val Viewport.coordinatesOfRightBottomCorner: Vector2
             )
         )
     }
+val Viewport.coordinatesOfLeftTopCorner: Vector2
+    get() {
+        return unproject(vec2(screenX.toFloat(), screenY.toFloat()))
+    }
