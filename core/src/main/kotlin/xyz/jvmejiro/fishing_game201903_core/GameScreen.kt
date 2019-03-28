@@ -59,8 +59,8 @@ class GameScreen(private val context: Context) : KtxScreen {
         FishingRodBuilder.builder(player, engine) {
             position = vec2(25f, tempH + 15f)
             size = vec2(10f, 20f)
-            hookNum = 5
-            hookGenerateOffset = vec2(10f, 0f)
+            hookNum = 10
+            hookSpawnOffset = vec2(10f, -50f)
         }.build()
 
         // resister events

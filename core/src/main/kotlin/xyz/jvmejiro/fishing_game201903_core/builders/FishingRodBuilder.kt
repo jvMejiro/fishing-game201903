@@ -12,7 +12,7 @@ import xyz.jvmejiro.fishing_game201903_core.components.*
 class FishingRodBuilder(parentPlayer: Entity, private val engine: Engine) {
     var position = vec2()
     var size = vec2()
-    var hookGenerateOffset = vec2()
+    var hookSpawnOffset = vec2()
     var hookNum = 1
     var parentPlayer: Entity = parentPlayer
         set(value) {
@@ -28,7 +28,7 @@ class FishingRodBuilder(parentPlayer: Entity, private val engine: Engine) {
             with<Rotation> { }
             with<StateComponent>()
             with<Direction>()
-        }.add(TextureComponent(texture = null)).add(FishingRod(hookGenerateOffset, hookNum, parentPlayer))
+        }.add(TextureComponent(texture = null)).add(FishingRod(hookSpawnOffset, hookNum, parentPlayer))
     }
 
     companion object {
