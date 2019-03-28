@@ -42,6 +42,7 @@ class FishSystem(eventBus: EventBus, val gameViewport: Viewport) : StateMachineS
 sealed class FishState : EntityState() {
     companion object {
         private val STATE_MAPPER: ComponentMapper<StateComponent> = mapperFor()
+        private val HITBOX_MAPPER: ComponentMapper<Hitbox> = mapperFor()
     }
 
     object IDLE : FishState()
@@ -105,7 +106,7 @@ sealed class FishState : EntityState() {
 
     object CAUGHT : FishState() {
         override fun enter(entity: Entity, machine: StateMachineSystem, eventData: EventData) {
-            entity.remove(Hitbox::class.java)
+            entity[HITBOX_MAPPER]?.isEnable = false  // ヒットボックスの無効化
         }
     }
 }

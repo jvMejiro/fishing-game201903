@@ -79,6 +79,8 @@ class HookSystem(eventBus: EventBus) :
         for (fishEntity in fishEntities) {
             val fishPos = fishEntity[POSITION_MAPPER] ?: continue
             val fishHitbox = fishEntity[HITBOX_MAPPER] ?: continue
+            if (!fishHitbox.isEnable) continue
+
             tmpRectangle.set(
                 fishPos.value.x + fishHitbox.offset.x,
                 fishPos.value.y + fishHitbox.offset.y,
