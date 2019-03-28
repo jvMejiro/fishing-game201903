@@ -1,4 +1,4 @@
-package xyz.jvmejiro.fishing_game201903_core.components
+package xyz.jvmejiro.fishing_game201903_core.systems
 
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
@@ -7,9 +7,9 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.ashley.allOf
 import ktx.ashley.get
 import ktx.ashley.mapperFor
+import xyz.jvmejiro.fishing_game201903_core.components.*
 import xyz.jvmejiro.fishing_game201903_core.states.EventBus
 import xyz.jvmejiro.fishing_game201903_core.states.EventInterface
-import xyz.jvmejiro.fishing_game201903_core.systems.PropellingSystem
 
 class PropellingLogicSystem(private val eventBus: EventBus, private val gameViewport: Viewport) :
     IteratingSystem(
@@ -35,7 +35,12 @@ class PropellingLogicSystem(private val eventBus: EventBus, private val gameView
                 plc.logic.first { it.timing(entity, gameViewport) }.let { pd ->
                     val eventData = eventBus.createEventData()
                     val maintainedElapsedTime = entity[STATE_MAPPER]?.elapsedTime ?: return
-                    eventData.body = PropellingLogicMessage(pd.delay, maintainedElapsedTime, pd.timing, pd.logic)
+                    eventData.body = PropellingLogicMessage(
+                        pd.delay,
+                        maintainedElapsedTime,
+                        pd.timing,
+                        pd.logic
+                    )
                     plc.lastPropellingData = pd
                     eventBus.emit(PropellingLogicEvent.CHANGE_LOGIC, entity, eventData)
                 }
