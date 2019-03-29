@@ -55,12 +55,13 @@ class GameScreen(private val context: Context) : KtxScreen {
         // resister systems
         eventBus = EventBus()
         engine.addSystem(ShapeRenderSystem(shapeBatch))
+        engine.addSystem(RenderSystem(batch))
         engine.addSystem(PropellingSystem(1.0f / 60.0f))
         engine.addSystem(PropellingLogicSystem(eventBus, gameStage.viewport))
         engine.addSystem(StateSystem())
         engine.addSystem(MoveSystem())
 
-        engine.addSystem(FishSpawnSystem(1000, gameStage.viewport, 0.1f))
+        engine.addSystem(FishSpawnSystem(context, 1000, gameStage.viewport, 0.1f))
         engine.addSystem(FishSystem(eventBus, gameStage.viewport))
         engine.addSystem(FishingRodSystem(eventBus, gameStage.viewport))
         engine.addSystem(HookSystem(eventBus))

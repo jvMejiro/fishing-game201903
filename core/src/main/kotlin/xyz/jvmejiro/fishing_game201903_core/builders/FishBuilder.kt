@@ -2,6 +2,7 @@ package xyz.jvmejiro.fishing_game201903_core.builders
 
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.utils.Array
 import ktx.ashley.entity
 import ktx.math.vec2
@@ -16,6 +17,7 @@ class FishBuilder(val required: Engine) {
     var direction = vec2()
     var hitBoxSize = vec2()
     var hitBoxOffset = vec2()
+    var texture: TextureRegion? = null
 
     fun build(): Entity {
         val pds = Array<PropellingData>()
@@ -39,7 +41,7 @@ class FishBuilder(val required: Engine) {
                 vec2(hitBoxOffset.x, hitBoxOffset.y),
                 ShapeType.Rectangle
             )
-        ).add(TextureComponent(texture = null)).add(
+        ).add(TextureComponent(texture = texture)).add(
             PropellingComponent(FishState.SWIMMING.rightSwimLogic)
         ).add(
             PropellingLogicComponent(pds)

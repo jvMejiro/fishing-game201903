@@ -23,6 +23,4 @@ object PropellingUtil {
             gameViewport.coordinatesOfRightBottomCorner.x < pos.value.x
         }
     }
-
-    class IllegalEntityException(vararg notFoundComponent: KClass<*>) : RuntimeException()
 }
