@@ -2,21 +2,21 @@ package xyz.jvmejiro.fishing_game201903_core.systems
 
 import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
-import com.badlogic.ashley.core.Family.all
 import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import ktx.ashley.allOf
 import ktx.ashley.get
 import ktx.ashley.mapperFor
-import xyz.jvmejiro.fishing_game201903_core.*
+import ktx.math.*
+import xyz.jvmejiro.fishing_game201903_core.components.*
 
 class ShapeRenderSystem(private val batch: ShapeRenderer) : IteratingSystem(
-    all(
-        TextureComponent::class.java,
-        Size::class.java,
-        Position::class.java,
-        Hitbox::class.java,
-        Rotation::class.java
+    allOf(
+        TextureComponent::class,
+        Size::class,
+        Direction::class,
+        Position::class
     ).get(),
     10
 ) {
@@ -28,6 +28,7 @@ class ShapeRenderSystem(private val batch: ShapeRenderer) : IteratingSystem(
         private val POSITION_MAPPER: ComponentMapper<Position> = mapperFor()
         private val HITBOX_MAPPER: ComponentMapper<Hitbox> = mapperFor()
         private val ROTATION_MAPPER: ComponentMapper<Rotation> = mapperFor()
+        private val DIRECTION_MAPPER: ComponentMapper<Direction> = mapperFor()
     }
 
     override fun processEntity(entity: Entity, deltaTime: Float) {
@@ -47,43 +48,52 @@ class ShapeRenderSystem(private val batch: ShapeRenderer) : IteratingSystem(
         renderTargets.forEach {
             val size = it[SIZE_MAPPER] ?: return@forEach
             val position = it[POSITION_MAPPER] ?: return@forEach
-            val hitbox = it[HITBOX_MAPPER] ?: return@forEach
-            val rotation = it[ROTATION_MAPPER] ?: return@forEach
+            val hitbox = it[HITBOX_MAPPER]
+            val direction = it[DIRECTION_MAPPER] ?: return@forEach
+            val rotation = it[ROTATION_MAPPER]
 
             batch.begin(ShapeRenderer.ShapeType.Line)
 
             draw(position, rotation, size)
-            drawHitbox(hitbox, position, rotation)
+            hitbox?.let { drawHitbox(it, position, size, direction, rotation) }
             batch.end()
         }
     }
 
     private fun draw(
         position: Position,
-        rotation: Rotation,
+        rotation: Rotation?,
         size: Size
     ) {
+        val axis = rotation?.axis ?: vec2()
+        val degree = rotation?.degree ?: 0.0f
         batch.color = Color.RED
         batch.rect(
             position.value.x, position.value.y,
-            rotation.axis.x, rotation.axis.y,
+            axis.x, axis.y,
             size.value.x, size.value.y,
             1.0f, 1.0f,
-            rotation.degree
+            degree
         )
     }
 
     private fun drawHitbox(
         hitbox: Hitbox,
         position: Position,
-        rotation: Rotation
+        size: Size,
+        direction: Direction,
+        rotation: Rotation?
     ) {
         batch.color = Color.BLUE.apply { a = 0.5f }
+        val centerPos = position.value + (size.value.div(2.0f))
+        // TODO Quaternion使った手法に変えたほうが良い
+        val currentHitboxPosX = centerPos.x + (position.value.x + hitbox.offset.x - centerPos.x) * direction.value.x
+        val currentHitboxPosY = position.value.y + hitbox.offset.y
         when (hitbox.type) {
             ShapeType.Rectangle ->
                 batch.rect(
-                    position.value.x + hitbox.offset.x, position.value.y + hitbox.offset.y,
-                    hitbox.size.x, hitbox.size.y
+                    currentHitboxPosX, currentHitboxPosY,
+                    hitbox.size.x * direction.value.x, hitbox.size.y
                 )
             ShapeType.Circle -> batch.ellipse(
                 position.value.x + hitbox.offset.x,

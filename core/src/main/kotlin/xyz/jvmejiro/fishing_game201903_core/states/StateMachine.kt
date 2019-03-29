@@ -5,11 +5,10 @@ import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.Family
 import com.badlogic.ashley.systems.IteratingSystem
-import com.sun.webkit.dom.EntityImpl
 import ktx.ashley.get
 import ktx.ashley.mapperFor
 import ktx.log.debug
-import xyz.jvmejiro.fishing_game201903_core.StateComponent
+import xyz.jvmejiro.fishing_game201903_core.components.StateComponent
 import com.badlogic.gdx.utils.Array as GdxArray
 
 
@@ -55,8 +54,9 @@ interface StateMachine {
 
 abstract class StateMachineSystem(
     val eventBus: EventBus,
-    family: Family
-) : IteratingSystem(family), EventListener, StateMachine {
+    family: Family,
+    priority: Int = 0
+) : IteratingSystem(family, priority), EventListener, StateMachine {
 
     private var transitions = emptyMap<EntityState, Map<EventInterface, Transition>>()
     private var defaultTransition = emptyMap<EntityState, Transition>()
@@ -79,6 +79,7 @@ abstract class StateMachineSystem(
             EVENT_NOP(-1),
             EVENT_TOUCHED(-2),
             EVENT_SLIDE(-3),
+
             EVENT_KEY(-4),
             EVENT_KEY_UP(-5);
 

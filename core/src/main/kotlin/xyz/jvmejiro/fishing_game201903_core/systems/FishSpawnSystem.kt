@@ -1,40 +1,48 @@
 package xyz.jvmejiro.fishing_game201903_core.systems
 
-import com.badlogic.ashley.core.Family
+import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.systems.IntervalSystem
 import com.badlogic.gdx.math.MathUtils.random
+import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.ashley.add
-import ktx.ashley.entity
+import ktx.ashley.allOf
+import ktx.ashley.get
+import ktx.ashley.mapperFor
 import ktx.math.vec2
-import xyz.jvmejiro.fishing_game201903_core.*
+import xyz.jvmejiro.fishing_game201903_core.builders.FishBuilder
+import xyz.jvmejiro.fishing_game201903_core.components.Fish
+import xyz.jvmejiro.fishing_game201903_core.components.Player
+import xyz.jvmejiro.fishing_game201903_core.components.Position
+import xyz.jvmejiro.fishing_game201903_core.coordinatesOfRightBottomCorner
 
-class FishSpawnSystem(private val maxFishSize: Int, interval: Float) : IntervalSystem(interval) {
+class FishSpawnSystem(private val maxFishSize: Int, private val gameViewport: Viewport, interval: Float) :
+    IntervalSystem(interval) {
+    companion object {
+        private val POSITION_MAPPER: ComponentMapper<Position> = mapperFor()
+        private val FISH_FAMILY = allOf(Fish::class).get()
+        private val PLAYER_FAMILY = allOf(Player::class).get()
+    }
 
     override fun updateInterval() {
-        val existingFishSize = engine.getEntitiesFor(Family.all(Fish::class.java).get()).size()
+        val existingFishSize = engine.getEntitiesFor(FISH_FAMILY).size()
 
         if (existingFishSize < maxFishSize) {
+            val player = engine.getEntitiesFor(PLAYER_FAMILY).first()
+            val playerPos = player[POSITION_MAPPER] ?: return
             engine.add {
                 val sizeW = 20f
-                val sizeH = 20f
+                val sizeH = 10f
                 val offset = 5f
                 val posX = -sizeW
-                val posY = random(0.0f, screenHeight * 0.75f - sizeH)
-                entity {
-                    with<Fish>()
-                    with<Size> { value = vec2(sizeW, sizeH) }
-                    with<Position> { value = vec2(posX, posY) }
-                    with<Rotation>()
-                    with<Direction> { value = vec2(1f, 0f) }
-                    with<PropellingLogic> { logic = FishState.SWIMMING.rightSwimLogic }
+                val posY = random(gameViewport.coordinatesOfRightBottomCorner.y, playerPos.value.y - sizeH)
 
-                }.add(
-                    Hitbox(
-                        vec2(sizeW - offset, sizeH - offset),
-                        vec2(offset / 2.0f, offset / 2.0f),
-                        ShapeType.Rectangle
-                    )
-                ).add(TextureComponent(texture = null)).add(StateComponent())
+                FishBuilder.builder(engine) {
+                    position = vec2(posX, posY)
+                    size = vec2(sizeW, sizeH)
+                    direction = vec2(1f, 0f)
+                    hitBoxSize = vec2(size.x - offset, size.y - offset)
+                    hitBoxOffset = vec2(offset / 2.0f, offset / 2.0f)
+                }.build()
             }
         }
     }
