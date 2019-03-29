@@ -32,13 +32,7 @@ class HookSystem(eventBus: EventBus) :
 
     override fun describeMachine() {
         startWith(HookState.SINKING)
-        onState(HookState.SINKING).on(HookEvent.ARRIVE_TARGET) { entity, event ->
-            go(
-                HookState.STAY,
-                entity,
-                event
-            )
-        }
+        onState(HookState.SINKING).on(HookEvent.ARRIVE_TARGET) { entity, event -> go(HookState.STAY, entity, event) }
         onState(HookState.STAY).on(HookEvent.START_FLOAT) { entity, event -> go(HookState.FLOATING, entity, event) }
     }
 
@@ -79,6 +73,8 @@ class HookSystem(eventBus: EventBus) :
         for (fishEntity in fishEntities) {
             val fishPos = fishEntity[POSITION_MAPPER] ?: continue
             val fishHitbox = fishEntity[HITBOX_MAPPER] ?: continue
+            if (!fishHitbox.isEnable) continue
+
             tmpRectangle.set(
                 fishPos.value.x + fishHitbox.offset.x,
                 fishPos.value.y + fishHitbox.offset.y,
@@ -143,21 +139,16 @@ sealed class HookState : EntityState() {
 
         override fun enter(entity: Entity, machine: StateMachineSystem, eventData: EventData) {
             val hook = entity[HOOK_MAPPER] ?: return
-            entity.add(
-                Move(
-                    duration = FLOATING_DURATION, from = hook.to, target = hook.from
-                )
-            )
+            entity.add(Move(duration = FLOATING_DURATION, from = hook.to, target = hook.from))
         }
 
         override fun update(entity: Entity, machine: StateMachineSystem, delta: Float) {
             if (!entity.has(MOVE_MAPPER)) {
                 val hook = entity[HOOK_MAPPER] ?: return
                 val eventData = machine.eventBus.createEventData().apply {
-                    target = entity
                     body = hook.caughtFish
                 }
-                machine.eventBus.emit(HookEvent.FINISH, hook.parentFishingRpd, eventData)
+                machine.eventBus.emit(HookEvent.FINISH, hook.parentFishingRod, eventData)
             }
         }
     }

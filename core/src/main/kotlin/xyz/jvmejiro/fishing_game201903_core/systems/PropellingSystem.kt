@@ -14,7 +14,8 @@ class PropellingSystem(interval: Float) :
         allOf(
             PropellingComponent::class,
             Position::class,
-            StateComponent::class
+            StateComponent::class,
+            Direction::class
         ).get(), interval, PROPELLING_SYSTEM_PRIORITY
     ) {
 
@@ -22,7 +23,8 @@ class PropellingSystem(interval: Float) :
         private val PROPELLING_COMPONENT_MAPPER: ComponentMapper<PropellingComponent> = mapperFor()
         private val STATE_MAPPER: ComponentMapper<StateComponent> = mapperFor()
         private val POSITION_MAPPER: ComponentMapper<Position> = mapperFor()
-        val PROPELLING_SYSTEM_PRIORITY = 5
+        private val DIRECTION_MAPPER: ComponentMapper<Direction> = mapperFor()
+        const val PROPELLING_SYSTEM_PRIORITY = 5
     }
 
     override fun processEntity(entity: Entity) {
@@ -42,7 +44,9 @@ class PropellingSystem(interval: Float) :
 
         propelling.current?.let {
             val elapsedTime = entity[STATE_MAPPER]?.elapsedTime ?: return
-            position.value += it(interval, elapsedTime)
+            val dPos = it(interval, elapsedTime)
+            entity[DIRECTION_MAPPER]?.value = dPos.nor()  // 向きの変更
+            position.value += dPos
         }
     }
 }
