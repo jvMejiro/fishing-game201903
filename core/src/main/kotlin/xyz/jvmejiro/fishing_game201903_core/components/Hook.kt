@@ -20,7 +20,7 @@ class Hook(
         private val FISHING_ROD_MAPPER: ComponentMapper<FishingRod> = mapperFor()
     }
 
-    var parentFishingRpd: Entity = parentFishingRod
+    var parentFishingRod: Entity = parentFishingRod
         set(value) {
             value.let {
                 if (!it.has(FISHING_ROD_MAPPER)) throw IllegalArgumentException()

@@ -42,6 +42,7 @@ class FishSystem(eventBus: EventBus, val gameViewport: Viewport) : StateMachineS
 sealed class FishState : EntityState() {
     companion object {
         private val STATE_MAPPER: ComponentMapper<StateComponent> = mapperFor()
+        private val HITBOX_MAPPER: ComponentMapper<Hitbox> = mapperFor()
     }
 
     object IDLE : FishState()
@@ -84,7 +85,6 @@ sealed class FishState : EntityState() {
         override fun update(entity: Entity, machine: StateMachineSystem, delta: Float) {
             val propellingLogicMessage = IDLE_TIME_MAP[entity] ?: return
             val elapsedTime = entity[STATE_MAPPER]?.elapsedTime ?: return
-            // 遅延中に遷移条件を満たさなくなった場合、中断イベントを発信
 
             // 経過時間チェック
             if (elapsedTime > propellingLogicMessage.delayTime) {
@@ -92,6 +92,7 @@ sealed class FishState : EntityState() {
                 eventData.body = propellingLogicMessage
                 machine.eventBus.emit(FishEvent.FINISH_SWIMMING_IDLE, entity, eventData)
             } else {
+                // 遅延中に遷移条件を満たさなくなった場合、中断イベントを発信
                 if (!propellingLogicMessage.nextLogicTiming(entity, (machine as FishSystem).gameViewport)) {
                     machine.eventBus.emit(FishEvent.INTERRUPTION, entity)
                 }
@@ -105,7 +106,7 @@ sealed class FishState : EntityState() {
 
     object CAUGHT : FishState() {
         override fun enter(entity: Entity, machine: StateMachineSystem, eventData: EventData) {
-            entity.remove(Hitbox::class.java)
+            entity[HITBOX_MAPPER]?.isEnable = false  // ヒットボックスの無効化
         }
     }
 }

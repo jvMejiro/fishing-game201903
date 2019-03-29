@@ -23,16 +23,12 @@ data class TextureComponent(
 
 class PointComponent(val point: Int = 0) : Component
 
-data class Hitbox(var size: Vector2, var offset: Vector2 = vec2(), var type: ShapeType) : Component
+data class Hitbox(var size: Vector2, var offset: Vector2 = vec2(), var type: ShapeType, var isEnable: Boolean = true) :
+    Component
+
 data class Player(var score: Int = 0) : Component
 data class Fish(var mouthOffset: Vector2 = vec2(), var point: Int = 0) : Component
-data class FishingRod(var hookSpawnPointOffset: Vector2 = vec2(), var hookNum: Int = 1) : Component {
-    var sinkingHookNum: Int = 0
-        set(value) {
-            if (field < 0) throw IllegalArgumentException()
-            field = value
-        }
-}
+
 data class Move(
     var duration: Float,
     var from: Vector2,
